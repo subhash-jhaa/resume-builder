@@ -15,6 +15,11 @@ export default function SortableBlock({ block, selected, onSelect, onRemove }) {
   } = useSortable({ id: block.id });
 
   const def = BLOCK_DEFINITIONS[block.type];
+  
+  // If the block type is unknown (e.g. from outdated local storage), 
+  // skip rendering to prevent crashing the entire application.
+  if (!def) return null;
+
   const Icon = def.icon;
 
   let previewText = '';
@@ -40,6 +45,7 @@ export default function SortableBlock({ block, selected, onSelect, onRemove }) {
         transform: CSS.Transform.toString(transform),
         transition,
         zIndex: isDragging ? 50 : 1,
+        touchAction: 'none',
       }}
       className={`flex items-center gap-3.5 p-3.5 mb-2 bg-bg-elevated border rounded-xl cursor-point transition-all duration-200 group ${selected ? 'border-blue-500 ring-1 ring-blue-500' : 'border-border hover:border-blue-500/30'} ${isDragging ? 'opacity-0' : 'opacity-100'}`}
       onClick={() => onSelect(block.id)}

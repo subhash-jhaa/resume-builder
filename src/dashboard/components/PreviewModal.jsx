@@ -49,13 +49,15 @@ export default function PreviewModal({ show, blocks, onClose }) {
         >
           {/* Header Action Bar */}
           <div className="h-[64px] bg-[#18181b] border-b border-white/10 px-6 flex items-center justify-between shrink-0 no-print">
-            <h2 className="text-lg font-bold text-white tracking-tight">Preview & Export</h2>
+            <h2 className="text-[14px] sm:text-lg font-bold text-white tracking-tight truncate mr-2">Preview & Export</h2>
             <div className="flex items-center gap-3">
               <button 
                 onClick={() => window.print()} 
-                className="h-10 px-5 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg text-white text-sm font-bold flex items-center gap-2 hover:brightness-110 shadow-lg shadow-blue-500/20 transition-all"
+                className="h-10 px-3 md:px-5 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg text-white text-sm font-bold flex items-center gap-2 hover:brightness-110 shadow-lg shadow-blue-500/20 transition-all shrink-0"
               >
-                🖨️ Print / Save PDF
+                <span>🖨️</span>
+                <span className="hidden sm:inline">Print / Save PDF</span>
+                <span className="inline sm:hidden">Print</span>
               </button>
               <button 
                 onClick={onClose} 
@@ -68,7 +70,7 @@ export default function PreviewModal({ show, blocks, onClose }) {
           
           {/* Resume Document Area */}
           <div className="flex-1 overflow-y-auto p-4 md:p-12 flex justify-center bg-[#050505] scrollbar-hidden">
-            <div className="print-area bg-white text-[#1e293b] w-[210mm] min-h-[297mm] p-[15mm_20mm] shadow-2xl relative grid grid-cols-[1fr_240px] gap-[30px] self-start leading-normal text-sm font-sans">
+            <div className="print-area bg-white text-[#1e293b] w-[210mm] min-h-[297mm] p-[15mm_20mm] shadow-2xl relative grid grid-cols-[1fr_240px] gap-[30px] self-start leading-normal text-sm font-sans origin-top transform scale-[var(--preview-scale,1)] lg:scale-100" style={{ '--preview-scale': 'calc(100vw / 230mm)' }}>
               {blocks.length === 0 ? (
                 <div className="col-span-2 flex items-center justify-center h-[200px] text-slate-400 font-medium">
                   Your resume is entirely empty.

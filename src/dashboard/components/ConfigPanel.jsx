@@ -2,15 +2,23 @@ import React from 'react';
 import { Plus, Trash2, X, MoreVertical, GripVertical, ChevronDown } from 'lucide-react';
 import { BLOCK_DEFINITIONS } from '../data/blockDefs';
 
-const SectionHeader = ({ icon: Icon, title, typeLabel }) => (
-  <div className="flex items-center gap-2.5 px-4 h-[56px] border-b border-border bg-bg-surface/50 shrink-0 select-none">
-    <div className="w-8 h-8 rounded-lg bg-bg-elevated flex items-center justify-center text-blue-500 border border-border shadow-sm">
-      <Icon size={16} strokeWidth={2.5} />
+const SectionHeader = ({ title, typeLabel, onClose }) => (
+  <div className="flex items-center justify-between px-4 h-[56px] border-b border-border bg-bg-surface/50 shrink-0 select-none">
+    <div className="flex items-center gap-2.5">
+      <div className="w-8 h-8 rounded-lg bg-bg-elevated flex items-center justify-center text-blue-500 border border-border shadow-sm">
+        <div className="flex items-center justify-center text-[10px] font-bold">🛠️</div>
+      </div>
+      <div className="flex flex-col">
+        <span className="text-[13px] font-bold text-text-1 leading-tight">{title}</span>
+        <span className="text-[10px] text-text-3 font-bold uppercase tracking-widest">{typeLabel}</span>
+      </div>
     </div>
-    <div className="flex flex-col">
-      <span className="text-[13px] font-bold text-text-1 leading-tight">{title}</span>
-      <span className="text-[10px] text-text-3 font-bold uppercase tracking-widest">{typeLabel}</span>
-    </div>
+    <button 
+      onClick={onClose}
+      className="lg:hidden w-8 h-8 flex items-center justify-center text-text-3 hover:text-text-1 hover:bg-bg-elevated rounded-md transition-colors"
+    >
+      <X size={18} />
+    </button>
   </div>
 );
 
@@ -21,11 +29,14 @@ const Field = ({ label, children }) => (
   </div>
 );
 
-export default function ConfigPanel({ block, onUpdate }) {
+export default function ConfigPanel({ block, onUpdate, onClose }) {
   if (!block) {
     return (
-      <aside className="border-l border-border bg-bg-overlay backdrop-blur-xl flex flex-col h-screen overflow-hidden">
-        <div className="h-full flex flex-col items-center justify-center p-10 text-center gap-4 opacity-40">
+      <aside className="border-l border-border bg-bg-overlay backdrop-blur-xl flex flex-col h-full lg:h-screen overflow-hidden">
+        <div className="lg:hidden flex items-center justify-end px-4 h-[56px] border-b border-border">
+          <button onClick={onClose} className="p-2 text-text-3 hover:text-text-1"><X size={20} /></button>
+        </div>
+        <div className="flex-1 flex flex-col items-center justify-center p-10 text-center gap-4 opacity-40">
           <div className="w-16 h-16 bg-bg-elevated rounded-2xl flex items-center justify-center text-3xl">⚙️</div>
           <div className="flex flex-col gap-1">
             <h4 className="text-[14px] font-bold text-text-1">No section selected</h4>
@@ -58,8 +69,8 @@ export default function ConfigPanel({ block, onUpdate }) {
   };
 
   return (
-    <aside className="border-l border-border bg-bg-overlay backdrop-blur-xl flex flex-col h-screen overflow-hidden shadow-2xl">
-      <SectionHeader icon={def.icon} title={block.data.title || def.label} typeLabel={def.label} />
+    <aside className="border-l border-border bg-bg-overlay backdrop-blur-xl flex flex-col h-full lg:h-screen overflow-hidden shadow-2xl">
+      <SectionHeader title={block.data.title || def.label} typeLabel={def.label} onClose={onClose} />
 
       <div className="flex-1 overflow-y-auto p-4 scrollbar-hidden">
         {/* Universal Title Field (except header) */}

@@ -14,9 +14,9 @@ export default function Canvas({ blocks, selectedId, onSelect, onRemove, placeho
   return (
     <div 
       ref={setNodeRef} 
-      className="flex-1 overflow-y-auto p-8 flex justify-center items-start bg-bg-base scrollbar-hidden"
+      className="flex-1 overflow-y-auto px-4 py-8 lg:p-8 flex justify-center items-start bg-bg-base scrollbar-hidden"
     >
-      <div className="w-[800px] min-h-[60vh] flex flex-col gap-2">
+      <div className="w-full max-w-4xl min-h-[60vh] flex flex-col gap-2">
         {blocks.length === 0 && placeholderIndex === -1 ? (
           <div className="flex flex-col items-center justify-center min-h-[50vh] text-center gap-3 p-10 border-2 border-dashed border-border rounded-2xl bg-bg-surface/50">
             <div className="w-16 h-16 bg-bg-elevated rounded-2xl flex items-center justify-center text-3xl mb-2">

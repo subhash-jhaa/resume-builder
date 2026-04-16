@@ -6,8 +6,8 @@ export default function LandingPage({ onStart, isLightMode, onToggleTheme }) {
     <div className="min-h-screen bg-bg-base text-text-1 flex flex-col relative overflow-x-hidden">
       {/* Navigation */}
       <nav className="h-[70px] px-10 flex items-center justify-between border-b border-border bg-bg-base sticky top-0 z-[100]">
-        <div className="flex items-center gap-[10px] font-extrabold text-[20px] tracking-tighter">
-          <div className="w-[10px] height-[10px] bg-blue-500 rounded-full" />
+        <div className="flex items-center gap-[10px] font-extrabold text-[18px] sm:text-[20px] tracking-tighter">
+          <div className="w-[8px] h-[8px] sm:w-[10px] sm:h-[10px] bg-blue-500 rounded-full" />
           <span>ResumeBuilder</span>
         </div>
         <div className="flex items-center gap-3">

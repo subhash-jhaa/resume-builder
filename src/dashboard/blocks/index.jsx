@@ -156,3 +156,4 @@ export const BLOCK_RENDERERS = {
   image: ImageBlock,
   certification: CertificationBlock,
 };
+

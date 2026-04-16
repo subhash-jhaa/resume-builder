@@ -13,7 +13,7 @@ import {
   arrayMove,
   sortableKeyboardCoordinates,
 } from '@dnd-kit/sortable';
-import { Sun, Moon, Eye, Trash2 } from 'lucide-react';
+import { Sun, Moon, Eye, Trash2, Menu, Settings } from 'lucide-react';
 import { BLOCK_DEFINITIONS } from './dashboard/data/blockDefs';
 import Palette from './dashboard/components/Palette';
 import Canvas from './dashboard/components/Canvas';
@@ -33,7 +33,13 @@ function App() {
   const [blocks, setBlocks] = useState(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
-      return saved ? JSON.parse(saved) : [];
+      if (!saved) return [];
+      const parsed = JSON.parse(saved);
+      // Filter out any blocks whose types are no longer in our definitions
+      // This prevents crashes when block definitions are changed or reverted
+      return Array.isArray(parsed) 
+        ? parsed.filter(block => BLOCK_DEFINITIONS[block.type]) 
+        : [];
     } catch { return []; }
   });
 
@@ -42,10 +48,11 @@ function App() {
   const [isLightMode, setIsLightMode] = useState(() => {
     return localStorage.getItem('resume-theme') === 'light';
   });
-  const [activeId, setActiveId] = useState(null);
   const [activeType, setActiveType] = useState(null);
   const [overIndex, setOverIndex] = useState(-1);
   const [hasStarted, setHasStarted] = useState(false);
+  const [showPalette, setShowPalette] = useState(false);
+  const [showConfig, setShowConfig] = useState(false);
 
   useEffect(() => {
     document.documentElement.classList.toggle('light', isLightMode);
@@ -62,7 +69,6 @@ function App() {
   );
 
   const handleDragStart = ({ active }) => {
-    setActiveId(active.id);
     if (active.data.current?.isPaletteItem) {
       setActiveType(active.data.current.type);
     }
@@ -83,7 +89,6 @@ function App() {
   };
 
   const handleDragEnd = ({ active, over }) => {
-    setActiveId(null);
     setActiveType(null);
     setOverIndex(-1);
 
@@ -112,11 +117,6 @@ function App() {
     }
   };
 
-  const updateBlock = (id, partialData) => {
-    setBlocks(prev => prev.map(b =>
-      b.id === id ? { ...b, data: { ...b.data, ...partialData } } : b
-    ));
-  };
 
   const handleRemove = (id) => {
     setBlocks(blocks.filter(b => b.id !== id));
@@ -157,65 +157,85 @@ function App() {
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
-      <div className="grid grid-cols-[260px_1fr_280px] h-screen overflow-hidden relative font-sans bg-bg-base text-text-1">
-        <Palette onClearAll={handleClearAll} />
+      <div className="flex h-screen overflow-hidden relative font-sans bg-bg-base text-text-1">
+        {/* Mobile Backdrop */}
+        {(showPalette || showConfig) && (
+          <div 
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[40] transition-opacity duration-300 lg:hidden"
+            onClick={() => { setShowPalette(false); setShowConfig(false); }}
+          />
+        )}
 
-        <div className="flex flex-col h-screen overflow-hidden min-w-0 bg-bg-base">
+        <div className={`fixed inset-y-0 left-0 z-[50] w-[260px] transform lg:relative lg:translate-x-0 transition-transform duration-300 ease-in-out ${showPalette ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
+          <Palette onClearAll={handleClearAll} />
+        </div>
+
+        <div className="flex flex-col flex-1 h-screen overflow-hidden min-w-0 bg-bg-base">
           {/* Top Header Bar */}
-          <header className="h-[56px] bg-bg-overlay backdrop-blur-md border-b border-border px-5 flex items-center justify-between gap-3 shrink-0 z-10">
-            <div className="flex items-center gap-3 cursor-pointer transition-all hover:opacity-80 hover:-translate-y-px select-none" onClick={() => setHasStarted(false)} title="Return to Landing Page">
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center shadow-[0_4px_12px_rgba(59,130,246,0.3)] shrink-0">
-                <svg viewBox="0 0 24 26" fill="none" xmlns="http://www.w3.org/2000/svg" width="18" height="18">
-                  <path d="M6 2h8l6 6v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" fill="white" fillOpacity="0.35" stroke="white" strokeWidth="1.8" strokeLinejoin="round" />
-                  <path d="M14 2v6h6" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                  <line x1="8" y1="13" x2="16" y2="13" stroke="white" strokeWidth="2" strokeLinecap="round" />
-                  <line x1="8" y1="17" x2="13" y2="17" stroke="white" strokeWidth="2" strokeLinecap="round" />
-                </svg>
+          <header className="h-[56px] bg-bg-overlay backdrop-blur-md border-b border-border px-4 lg:px-5 flex items-center justify-between gap-3 shrink-0 z-10">
+            <div className="flex items-center gap-2 lg:gap-3">
+              <button 
+                onClick={() => setShowPalette(!showPalette)}
+                className="lg:hidden w-8 h-8 flex items-center justify-center text-text-2 hover:bg-bg-elevated rounded-md"
+              >
+                <Menu size={20} />
+              </button>
+              
+              <div className="flex items-center gap-3 cursor-pointer select-none" onClick={() => setHasStarted(false)}>
+                <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center shadow-lg shrink-0">
+                  <svg viewBox="0 0 24 26" fill="none" width="18" height="18">
+                    <path d="M6 2h8l6 6v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" fill="white" fillOpacity="0.35" stroke="white" strokeWidth="1.8" />
+                    <path d="M14 2v6h6" stroke="white" strokeWidth="1.8" />
+                    <line x1="8" y1="13" x2="16" y2="13" stroke="white" strokeWidth="2" />
+                  </svg>
+                </div>
+                <span className="hidden sm:inline text-base font-bold tracking-tight text-text-1">Resume<span className="text-blue-500">Builder</span></span>
               </div>
-              <span className="text-base font-bold tracking-tight text-text-1">Resume<span className="text-blue-500">Builder</span></span>
             </div>
 
-            <div className="flex items-center gap-2 flex-1 justify-center">
+            <div className="hidden md:flex items-center gap-2 flex-1 justify-center">
               <span className="text-[12px] text-text-2 bg-bg-elevated border border-border py-0.5 px-2.5 rounded-full font-medium">
-                {blocks.length} section{blocks.length !== 1 ? 's' : ''}
+                {blocks.length} sections
               </span>
               {selectedBlock && (
-                <span className="text-[12px] text-blue-500 bg-blue-500/10 border border-blue-500/30 py-0.5 px-2.5 rounded-full font-medium">
+                <span className="text-[12px] text-blue-500 bg-blue-500/10 border border-blue-500/30 py-0.5 px-2.5 rounded-full font-medium truncate max-w-[150px]">
                   Editing: {BLOCK_DEFINITIONS[selectedBlock.type]?.label}
                 </span>
               )}
             </div>
 
             <div className="flex items-center gap-2 shrink-0">
-              {blocks.length > 0 && (
-                <button 
-                  className="h-[34px] px-3 bg-transparent border border-border rounded-md text-text-2 text-[12px] font-medium cursor-pointer transition-all hover:border-red-500 hover:text-red-500 flex items-center gap-2" 
-                  onClick={handleClearAll}
-                >
-                  <Trash2 size={13} strokeWidth={2} /> Clear All
-                </button>
-              )}
-
               <button 
-                className="h-[34px] px-4 bg-gradient-to-br from-blue-500 to-blue-600 border-none rounded-md text-white text-[13px] font-semibold flex items-center gap-2 cursor-pointer transition-all hover:brightness-110 hover:-translate-y-px hover:shadow-[0_6px_16px_rgba(59,130,246,0.4)] shadow-[0_4px_12px_rgba(59,130,246,0.3)] relative overflow-hidden" 
+                className="h-[34px] px-3 bg-gradient-to-br from-blue-500 to-blue-600 border-none rounded-md text-white text-[13px] font-semibold flex items-center gap-2 cursor-pointer transition-all hover:brightness-110 shadow-lg" 
                 onClick={() => setShowPreview(true)}
               >
                 <Eye size={14} strokeWidth={2} />
-                Preview & Export
+                <span className="hidden xs:inline">Preview</span>
               </button>
+
+              {selectedId && (
+                <button 
+                  onClick={() => setShowConfig(!showConfig)}
+                  className="lg:hidden w-8 h-8 flex items-center justify-center bg-bg-elevated border border-border text-text-2 hover:text-blue-500 rounded-md"
+                >
+                  <Settings size={18} />
+                </button>
+              )}
             </div>
           </header>
 
           <Canvas
             blocks={blocks}
             selectedId={selectedId}
-            onSelect={setSelectedId}
+            onSelect={(id) => { setSelectedId(id); if(id) setShowConfig(true); }}
             onRemove={handleRemove}
             placeholderIndex={activeType ? overIndex : -1}
           />
         </div>
 
-        <ConfigPanel block={selectedBlock} onUpdate={handleUpdate} />
+        <div className={`fixed inset-y-0 right-0 z-[50] w-[280px] transform lg:relative lg:translate-x-0 transition-transform duration-300 ease-in-out ${showConfig && selectedId ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'} ${!selectedId ? 'lg:hidden' : ''}`}>
+          <ConfigPanel block={selectedBlock} onUpdate={handleUpdate} onClose={() => setShowConfig(false)} />
+        </div>
 
         <PreviewModal
           show={showPreview}
@@ -223,7 +243,7 @@ function App() {
           onClose={() => setShowPreview(false)}
         />
 
-        <DragOverlay dropAnimation={dropAnimationConfig}>
+        <DragOverlay dropAnimation={dropAnimationConfig} zIndex={1000}>
           {activeDef ? (
             <div className="bg-bg-elevated border border-blue-500/50 text-blue-500 py-2 px-4 rounded-xl shadow-2xl flex items-center gap-2 font-bold scale-105">
               {activeDef.icon && <activeDef.icon size={16} strokeWidth={2.5} />}
